@@ -96,7 +96,7 @@ public:
     void digitalcom_inputSelect(int input);
     int getInputState()const{return inputState;}
 
-private:
+protected:
 
 	void nec_On();
 	void nec_Off();
