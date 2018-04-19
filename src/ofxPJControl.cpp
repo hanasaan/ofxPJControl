@@ -312,6 +312,13 @@ void ofxPJControl::digitalcom_shutter(bool b)
     shutterState = b;
 }
 
+void ofxPJControl::digitalcom_inputSelect(int input)
+{
+    string cmd = "*input = " + ofToString(input) + "\r";
+    sendCommand(cmd);
+    inputState = input;
+}
+
 void ofxPJControl::inputSelect(int input)
 {
     string command;

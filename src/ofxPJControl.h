@@ -90,9 +90,12 @@ public:
     void shutter(bool b);
     void christie_shutter(bool b);
     void digitalcom_shutter(bool b);
-    bool getShutterState(){return shutterState;}
+    bool getShutterState()const{return shutterState;}
     void inputSelect(int input);
-    
+
+    void digitalcom_inputSelect(int input);
+    int getInputState()const{return inputState;}
+
 private:
 
 	void nec_On();
@@ -119,6 +122,7 @@ private:
 	int commMode;
 
     bool shutterState;
+    int inputState;
 };
 
 #endif
