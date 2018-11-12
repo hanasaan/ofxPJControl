@@ -148,8 +148,11 @@ void ofxPJControl::sendCommand(string command){
         ofSleepMillis(100);
         ofLogNotice() << "Response length (Bytes) : " << pjClient.getNumReceivedBytes();
         msgRx = "";
+        msgRxRaw.resize(128);
         if(pjClient.getNumReceivedBytes() > 0){
-            msgRx = pjClient.receiveRaw();
+            //msgRx = pjClient.receiveRaw();
+            int nsize = pjClient.receiveRawMsg(&msgRxRaw.front(), msgRxRaw.size());
+            msgRxRaw.resize(nsize);
             ofLogNotice() << "received response : " << msgRx;
         }
     
@@ -276,7 +279,19 @@ void ofxPJControl::pjDesign_Off() {
     projStatus = false; //projector off
 }
 
-void ofxPJControl::shutter(bool b)
+void ofxPJControl::shutter(bool b) {
+    if (commMode == PJLINK_MODE) {
+        pjLink_shutter(b);
+    }
+    else if (commMode == CHRISTIE_MODE) {
+        christie_shutter(b);
+    }
+    else if (commMode == BARCO_MODE) {
+        barco_shutter(b);
+    }
+}
+
+void ofxPJControl::pjLink_shutter(bool b)
 {
     if(b){
         sendPJLinkCommand("%1AVMT 31\r");
@@ -298,6 +313,38 @@ void ofxPJControl::christie_shutter(bool b){
     }
     shutterState = b;
 }
+
+void ofxPJControl::barco_shutter(bool b){
+    if(b){
+        vector<uint8_t> com = {0x23, 0x42, 0x00};
+        sendBarcoCommand(com);
+    }
+    else{
+        vector<uint8_t> com = {0x22, 0x42, 0x00};
+        sendBarcoCommand(com);
+    }
+    shutterState = b;
+}
+
+void ofxPJControl::sendBarcoCommand(const vector<uint8_t>& com)
+{
+    int checksum = 0;
+    for (const auto& c : com) {
+        checksum += c;
+    }
+    checksum = checksum % 256;
+    string command;
+    command.resize(com.size() + 4, 0xFF);
+    command[0] = 0xFE;
+    command[1] = 0x00;
+    for (int i=0; i<com.size(); ++i) {
+        command[i + 2] = com.at(i);
+    }
+    command[2 + com.size()] = checksum;
+    command[3 + com.size()] = 0xFF;
+    sendCommand(command);
+}
+
 
 void ofxPJControl::digitalcom_shutter(bool b)
 {
@@ -345,5 +392,35 @@ void ofxPJControl::inputSelect(int input)
         sendPJLinkCommand(command);
     }
 }
+
+bool ofxPJControl::getShutterCommand()
+{
+    if (commMode == CHRISTIE_MODE) {
+        return christie_get_shutter();
+    }
+    else if (commMode == BARCO_MODE) {
+        return barco_get_shutter();
+    }
+    return false;
+}
+
+
+bool ofxPJControl::barco_get_shutter()
+{
+    vector<uint8_t> com = {0x21, 0x42};
+    sendBarcoCommand(com);
+    if (msgRxRaw.size() > 4) {
+        return msgRxRaw[4] == 0x00;
+    }
+    ofLogError() << "get shutter status failed.";
+    return false;
+}
+
+bool ofxPJControl::christie_get_shutter()
+{
+    return false;
+}
+
+
 
 

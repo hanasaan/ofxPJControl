@@ -55,12 +55,14 @@ const int CHRISTIE_PORT = 3002; //CHRISTIE projector protocol port
 const int SANYO_PORT = 100; //SANYO projector protocol port
 const int PJDESIGN_PORT = 1025; //Projectino Design projector protocol port
 const int DIGITALCOM_PORT = 7000; //Digital Communication projector port
+const int BARCO_PORT = 43680;
 
 const int PJLINK_MODE = 0;
 const int NEC_MODE = 1;
 const int CHRISTIE_MODE = 2;
 const int SANYO_MODE = 3;
 const int PJDESIGN_MODE = 4;
+const int BARCO_MODE = 5;
 
 enum{
     SONY_INPUT_A=1,
@@ -86,9 +88,8 @@ public:
 	bool getProjectorStatus(); //return whether projector is on (true) or off (false)
 	void setProjectorPort(int port); //the network port of the projector
 	void sendCommand(string command); //send any string command to the projector without password authentication
-    
+
     void shutter(bool b);
-    void christie_shutter(bool b);
     void digitalcom_shutter(bool b);
     bool getShutterState()const{return shutterState;}
     void inputSelect(int input);
@@ -96,7 +97,16 @@ public:
     void digitalcom_inputSelect(int input);
     int getInputState()const{return inputState;}
 
+    bool getShutterCommand();
 protected:
+    void sendBarcoCommand(const vector<uint8_t>& com);
+    
+    void pjLink_shutter(bool b);
+    void christie_shutter(bool b);
+    void barco_shutter(bool b);
+    
+    bool barco_get_shutter();
+    bool christie_get_shutter();
 
 	void nec_On();
 	void nec_Off();
@@ -123,6 +133,8 @@ protected:
 
     bool shutterState;
     int inputState;
+    
+    vector<char> msgRxRaw;
 };
 
 #endif
