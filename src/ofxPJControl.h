@@ -63,6 +63,7 @@ const int CHRISTIE_MODE = 2;
 const int SANYO_MODE = 3;
 const int PJDESIGN_MODE = 4;
 const int BARCO_MODE = 5;
+const int DIGITALCOM_MODE = 6;
 
 enum{
     SONY_INPUT_A=1,

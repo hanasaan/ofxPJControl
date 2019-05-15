@@ -289,6 +289,9 @@ void ofxPJControl::shutter(bool b) {
     else if (commMode == BARCO_MODE) {
         barco_shutter(b);
     }
+    else if (commMode == DIGITALCOM_MODE) {
+        digitalcom_shutter(b);
+    }
 }
 
 void ofxPJControl::pjLink_shutter(bool b)
